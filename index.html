@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat WebSocket</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+text-align: center;
+margin: 20px;
+}
+#messages {
+margin-top: 20px;
+border: 1px solid #ddd;
+padding: 10px;
+width: 50%;
+margin: auto;
+height: 200px;
+overflow-y: auto;
+}
+input, button {
+padding: 10px;
+margin: 10px;
+}
+</style>
+</head>
+<body>
+<h2>Chat en Tiempo Real con WebSockets</h2>
+<input type="text" id="usernameInput" placeholder="Ingresa tu nombre..." />
+<br>
+<input type="text" id="messageInput" placeholder="Escribe un mensaje..." />
+<button onclick="sendMessage()">Enviar</button>
+<div id="messages"></div>
+<script>
+// Reemplaza con la URL que te da Ngrok
+const socket = new WebSocket('https://12345678.ngrok-free.app/');
+socket.addEventListener('open', function () {
+console.log('Conectado al servidor WebSocket');
+});
+socket.addEventListener('message', function (event) {
+const data = JSON.parse(event.data);
+if (data.type === 'history') {
+// Mostrar mensajes previos al conectarse
+data.messages.forEach(mensaje => {
+agregarMensaje(mensaje);
+});
+} else if (data.type === 'message') {
+// Mostrar mensaje en tiempo real
+agregarMensaje(data.message);
+}
+});
+function sendMessage() {
+const inputMessage = document.getElementById('messageInput');
+const message = inputMessage.value;
+const username = document.getElementById('usernameInput').value || 'Usuario desconocido';
+if (message) {
+socket.send(JSON.stringify({ username: username, message: message }));
+inputMessage.value = '';
+}
+}
+function agregarMensaje(mensaje) {
+const messagesDiv = document.getElementById('messages');
+messagesDiv.innerHTML += `<p><strong>${mensaje}</strong></p>`;
+}
+</script>
+</body>
+</html>
